@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+
+# Reference HTML files (not part of the app)
+*.html
+!index.html
+*_files/

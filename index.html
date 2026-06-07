@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>卡厄思梦境 · 伤害计算器</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <h1>卡厄思梦境 · 伤害计算器</h1>
+  </header>
+
+  <!-- ====== Tab Bar ====== -->
+  <nav class="tab-bar" role="tablist">
+    <button class="tab-btn active" data-tab="basic" role="tab" aria-selected="true">基础模式</button>
+    <button class="tab-btn" data-tab="advanced" role="tab" aria-selected="false">进阶模式</button>
+    <button class="tab-btn" data-tab="optimizer" role="tab" aria-selected="false">最优分析</button>
+    <button class="tab-btn" data-tab="montecarlo" role="tab" aria-selected="false">蒙特卡洛</button>
+  </nav>
+
+  <main class="tab-panels">
+
+    <!-- ==================== Tab 1: 基础模式 ==================== -->
+    <section id="tab-basic" class="tab-panel active" role="tabpanel">
+      <h2>基础模式</h2>
+      <div class="form-grid">
+        <label>
+          技能系数 (eff_value)
+          <input type="number" id="basic-eff-value" value="300" min="0" step="0.01">
+        </label>
+        <label>
+          ATK
+          <input type="number" id="basic-atk" value="1500" min="0" step="1">
+        </label>
+        <label>
+          DEF
+          <input type="number" id="basic-def" value="0" min="0" step="1">
+        </label>
+        <label>
+          暴击率 (%)
+          <input type="number" id="basic-crit-rate" value="3" min="0" max="100" step="0.1">
+        </label>
+        <label>
+          暴伤倍率 (%)
+          <input type="number" id="basic-crit-dmg" value="125" min="100" max="999" step="0.1">
+        </label>
+        <label>
+          属性颜色加成 (%)
+          <input type="number" id="basic-element-bonus" value="0" min="0" max="999" step="0.1">
+        </label>
+        <label>
+          追加攻击加成 (%)
+          <input type="number" id="basic-extra-atk-bonus" value="0" min="0" max="999" step="0.1">
+        </label>
+        <label>
+          伤害类型
+          <select id="basic-dmg-type">
+            <option value="normal">普通伤害</option>
+            <option value="penetrate">贯穿伤害</option>
+            <option value="fixed">固定伤害</option>
+            <option value="defense_mixed">基于防御(混合)</option>
+            <option value="defense_80">基于80%防御</option>
+            <option value="defense_100">基于100%防御</option>
+          </select>
+        </label>
+        <label class="full-width">
+          DVA 修饰列表
+          <textarea id="basic-dva-list" rows="4" placeholder="每行一个，格式: 符号 数值&#10;示例: ADD 20&#10;MULTIPLY_PCT 50&#10;FINAL_MULTIPLY 2"></textarea>
+        </label>
+      </div>
+      <button class="btn-primary" id="btn-basic-calc">计算伤害</button>
+    </section>
+
+    <!-- ==================== Tab 2: 进阶模式 ==================== -->
+    <section id="tab-advanced" class="tab-panel" role="tabpanel">
+      <h2>进阶模式</h2>
+
+      <!-- 基础属性 -->
+      <details class="section-block" open>
+        <summary>基础属性</summary>
+        <div class="form-grid">
+          <label>
+            BASE_S_ATK
+            <input type="number" id="adv-base-s-atk" value="1000" min="0" step="1">
+          </label>
+          <label>
+            BASE_S_DEF
+            <input type="number" id="adv-base-s-def" value="500" min="0" step="1">
+          </label>
+          <label>
+            BASE_S_HP
+            <input type="number" id="adv-base-s-hp" value="10000" min="0" step="1">
+          </label>
+        </div>
+      </details>
+
+      <!-- 局外加成 -->
+      <details class="section-block">
+        <summary>局外加成</summary>
+        <div class="form-grid">
+          <label>
+            atkRate (%)
+            <input type="number" id="adv-out-atk-rate" value="0" min="0" step="0.1">
+          </label>
+          <label>
+            atkAdd
+            <input type="number" id="adv-out-atk-add" value="0" min="0" step="1">
+          </label>
+          <label>
+            defRate (%)
+            <input type="number" id="adv-out-def-rate" value="0" min="0" step="0.1">
+          </label>
+          <label>
+            defAdd
+            <input type="number" id="adv-out-def-add" value="0" min="0" step="1">
+          </label>
+          <label>
+            hpRate (%)
+            <input type="number" id="adv-out-hp-rate" value="0" min="0" step="0.1">
+          </label>
+          <label>
+            hpAdd
+            <input type="number" id="adv-out-hp-add" value="0" min="0" step="1">
+          </label>
+        </div>
+      </details>
+
+      <!-- 局内加成 -->
+      <details class="section-block">
+        <summary>局内加成</summary>
+        <div class="form-grid">
+          <label>
+            atkRate (%)
+            <input type="number" id="adv-in-atk-rate" value="0" min="0" step="0.1">
+          </label>
+          <label>
+            atkAdd
+            <input type="number" id="adv-in-atk-add" value="0" min="0" step="1">
+          </label>
+          <label>
+            atkCal
+            <input type="number" id="adv-in-atk-cal" value="0" min="0" step="1">
+          </label>
+          <label>
+            defRate (%)
+            <input type="number" id="adv-in-def-rate" value="0" min="0" step="0.1">
+          </label>
+          <label>
+            defAdd
+            <input type="number" id="adv-in-def-add" value="0" min="0" step="1">
+          </label>
+          <label>
+            defCal
+            <input type="number" id="adv-in-def-cal" value="0" min="0" step="1">
+          </label>
+          <label>
+            hpRate (%)
+            <input type="number" id="adv-in-hp-rate" value="0" min="0" step="0.1">
+          </label>
+          <label>
+            hpAdd
+            <input type="number" id="adv-in-hp-add" value="0" min="0" step="1">
+          </label>
+          <label>
+            hpCal
+            <input type="number" id="adv-in-hp-cal" value="0" min="0" step="1">
+          </label>
+        </div>
+      </details>
+
+      <!-- 技能参数 -->
+      <details class="section-block">
+        <summary>技能参数</summary>
+        <div class="form-grid">
+          <label>
+            eff_value (技能系数)
+            <input type="number" id="adv-eff-value" value="300" min="0" step="0.01">
+          </label>
+          <label>
+            伤害类型
+            <select id="adv-dmg-type">
+              <option value="normal">普通伤害</option>
+              <option value="penetrate">贯穿伤害</option>
+              <option value="fixed">固定伤害</option>
+              <option value="defense_mixed">基于防御(混合)</option>
+              <option value="defense_80">基于80%防御</option>
+              <option value="defense_100">基于100%防御</option>
+            </select>
+          </label>
+          <label class="full-width">
+            DVA 修饰列表
+            <textarea id="adv-dva-list" rows="4" placeholder="每行一个，格式: 符号 数值&#10;示例: ADD 20&#10;MULTIPLY_PCT 50&#10;FINAL_MULTIPLY 2"></textarea>
+          </label>
+        </div>
+      </details>
+
+      <!-- 战斗参数 -->
+      <details class="section-block">
+        <summary>战斗参数</summary>
+        <div class="form-grid">
+          <label>
+            暴击率 (%)
+            <input type="number" id="adv-crit-rate" value="50" min="0" max="100" step="0.1">
+          </label>
+          <label>
+            暴伤倍率 (%)
+            <input type="number" id="adv-crit-dmg" value="150" min="100" max="999" step="0.1">
+          </label>
+          <label>
+            属性颜色加成 (%)
+            <input type="number" id="adv-element-bonus" value="0" min="0" max="999" step="0.1">
+          </label>
+          <label>
+            追加攻击加成 (%)
+            <input type="number" id="adv-extra-atk-bonus" value="0" min="0" max="999" step="0.1">
+          </label>
+        </div>
+      </details>
+
+      <button class="btn-primary" id="btn-adv-calc">计算伤害</button>
+    </section>
+
+    <!-- ==================== Tab 3: 最优分析 ==================== -->
+    <section id="tab-optimizer" class="tab-panel" role="tabpanel">
+      <h2>最优分析</h2>
+
+      <!-- 子标签切换 -->
+      <div class="sub-tab-bar">
+        <button class="sub-tab-btn active" data-subtab="opt-surface">暴击曲面图</button>
+        <button class="sub-tab-btn" data-subtab="opt-constrained">有限资源分配</button>
+        <button class="sub-tab-btn" data-subtab="opt-equipment">装备词条优化</button>
+      </div>
+
+      <!-- 子面板 1: 暴击曲面图 -->
+      <div id="opt-surface" class="sub-panel active">
+        <p class="hint-text">固定其他参数，扫描暴击率×暴伤的二维网格，计算每个点的期望伤害</p>
+        <div class="form-grid">
+          <label>
+            技能系数 (eff_value)
+            <input type="number" id="opt-eff-value" value="300" min="0" step="0.01">
+          </label>
+          <label>
+            ATK
+            <input type="number" id="opt-atk" value="1500" min="0" step="1">
+          </label>
+          <label>
+            属性颜色加成 (%)
+            <input type="number" id="opt-element-bonus" value="0" min="0" max="999" step="0.1">
+          </label>
+          <label>
+            追加攻击加成 (%)
+            <input type="number" id="opt-extra-atk-bonus" value="0" min="0" max="999" step="0.1">
+          </label>
+          <label>
+            伤害类型
+            <select id="opt-dmg-type">
+              <option value="normal">普通伤害</option>
+              <option value="penetrate">贯穿伤害</option>
+              <option value="fixed">固定伤害</option>
+              <option value="defense_mixed">基于防御(混合)</option>
+              <option value="defense_80">基于80%防御</option>
+              <option value="defense_100">基于100%防御</option>
+            </select>
+          </label>
+        </div>
+        <div class="toolbar">
+          <button class="btn-primary" id="btn-opt-generate">生成曲面图</button>
+          <label class="toggle-label">
+            <input type="checkbox" id="opt-chart-toggle"> 曲面图 / 热力图
+          </label>
+        </div>
+        <div id="crit-surface-chart" style="height: 500px;"></div>
+      </div>
+
+      <!-- 子面板 2: 有限资源分配 -->
+      <div id="opt-constrained" class="sub-panel">
+        <p class="hint-text">给定基础暴击率/暴伤和可分配属性点，计算如何分配能获得最高期望伤害</p>
+        <div class="form-grid">
+          <label>
+            技能系数 (eff_value)
+            <input type="number" id="oc-eff-value" value="300" min="0" step="0.01">
+          </label>
+          <label>
+            ATK
+            <input type="number" id="oc-atk" value="1500" min="0" step="1">
+          </label>
+          <label>
+            基础暴击率 (%)
+            <input type="number" id="oc-base-crit-rate" value="3" min="0" max="100" step="0.1">
+          </label>
+          <label>
+            基础暴伤 (%)
+            <input type="number" id="oc-base-crit-dmg" value="125" min="100" max="999" step="0.1">
+          </label>
+          <label>
+            可分配属性点
+            <input type="number" id="oc-total-points" value="60" min="1" max="500" step="1">
+          </label>
+          <label>
+            每点暴击率增量 (%)
+            <input type="number" id="oc-rate-per-point" value="1" min="0.1" max="20" step="0.1">
+          </label>
+          <label>
+            每点暴伤增量 (%)
+            <input type="number" id="oc-dmg-per-point" value="2" min="0.1" max="50" step="0.1">
+          </label>
+          <label>
+            属性颜色加成 (%)
+            <input type="number" id="oc-element-bonus" value="0" min="0" max="999" step="0.1">
+          </label>
+          <label>
+            追加攻击加成 (%)
+            <input type="number" id="oc-extra-atk-bonus" value="0" min="0" max="999" step="0.1">
+          </label>
+          <label>
+            伤害类型
+            <select id="oc-dmg-type">
+              <option value="normal">普通伤害</option>
+              <option value="penetrate">贯穿伤害</option>
+              <option value="fixed">固定伤害</option>
+              <option value="defense_mixed">基于防御(混合)</option>
+              <option value="defense_80">基于80%防御</option>
+              <option value="defense_100">基于100%防御</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn-primary" id="btn-oc-calc">计算最优分配</button>
+
+        <div id="oc-result" class="result-panel" style="display:none; margin-top:16px;">
+          <h3>最优分配方案</h3>
+          <div class="result-row">
+            <span class="result-label">暴击率</span>
+            <span class="result-value" id="oc-res-rate">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">暴伤倍率</span>
+            <span class="result-value" id="oc-res-dmg">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">分配给暴击率的点数</span>
+            <span class="result-value" id="oc-res-points-rate">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">分配给暴伤的点数</span>
+            <span class="result-value" id="oc-res-points-dmg">—</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">期望伤害</span>
+            <span class="result-value" id="oc-res-expected">—</span>
+          </div>
+        </div>
+
+        <div id="oc-curve-chart" style="height: 400px; margin-top: 16px;"></div>
+      </div>
+      <!-- 子面板 3: 装备词条优化 -->
+      <div id="opt-equipment" class="sub-panel">
+        <p class="hint-text">主词条二选一 + 副词条30次强化分配，计算最优装备方案</p>
+        <div class="form-grid">
+          <label>
+            技能系数 (eff_value)
+            <input type="number" id="eq-eff-value" value="300" min="0" step="0.01">
+          </label>
+          <label>
+            ATK
+            <input type="number" id="eq-atk" value="1500" min="0" step="1">
+          </label>
+          <label>
+            角色基础暴击率 (%)
+            <input type="number" id="eq-base-crit-rate" value="3" min="0" max="100" step="0.1">
+          </label>
+          <label>
+            角色基础暴伤 (%)
+            <input type="number" id="eq-base-crit-dmg" value="125" min="0" max="999" step="0.1">
+          </label>
+          <label>
+            副词条强化次数
+            <input type="number" id="eq-total-rolls" value="30" min="1" max="100" step="1">
+          </label>
+          <label>
+            主词条暴击率加成 (%)
+            <input type="number" id="eq-crit-rate-main" value="27" min="0" max="100" step="0.1">
+          </label>
+          <label>
+            主词条暴伤加成 (%)
+            <input type="number" id="eq-crit-dmg-main" value="40.8" min="0" max="200" step="0.1">
+          </label>
+          <label>
+            暴击率每词缀期望 (%)
+            <input type="number" id="eq-rate-per-roll" value="1.6" min="0.1" max="10" step="0.1">
+          </label>
+          <label>
+            暴伤每词缀期望 (%)
+            <input type="number" id="eq-dmg-per-roll" value="3.2" min="0.1" max="20" step="0.1">
+          </label>
+          <label>
+            暴击词条命中率 (%)
+            <input type="number" id="eq-crit-hit-rate" value="50" min="1" max="100" step="1">
+          </label>
+          <label>
+            属性颜色加成 (%)
+            <input type="number" id="eq-element-bonus" value="0" min="0" max="999" step="0.1">
+          </label>
+          <label>
+            追加攻击加成 (%)
+            <input type="number" id="eq-extra-atk-bonus" value="0" min="0" max="999" step="0.1">
+          </label>
+          <label>
+            伤害类型
+            <select id="eq-dmg-type">
+              <option value="normal">普通伤害</option>
+              <option value="penetrate">贯穿伤害</option>
+              <option value="fixed">固定伤害</option>
+              <option value="defense_mixed">基于防御(混合)</option>
+              <option value="defense_80">基于80%防御</option>
+              <option value="defense_100">基于100%防御</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn-primary" id="btn-eq-calc">计算最优装备方案</button>
+
+        <div id="eq-result" style="display:none; margin-top:16px;">
+          <div id="eq-recommend" class="result-panel" style="margin-bottom:16px;"></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="card">
+              <h3>主词条: 暴击率 +27%</h3>
+              <div id="eq-rate-summary"></div>
+              <div id="eq-rate-chart" style="height:300px;"></div>
+            </div>
+            <div class="card">
+              <h3>主词条: 暴伤 +40.8%</h3>
+              <div id="eq-dmg-summary"></div>
+              <div id="eq-dmg-chart" style="height:300px;"></div>
+            </div>
+          </div>
+
+          <!-- 随机强化模拟 -->
+          <div class="card" style="margin-top:16px;">
+            <h3>随机强化模拟（考虑词缀随机值）</h3>
+            <p class="hint-text">每次副词条强化随机取值（暴击率1.2~2.0%，暴伤2.4~4.0%），模拟10000次强化结果</p>
+            <div id="eq-mc-stats" style="margin-bottom:12px;"></div>
+            <div id="eq-mc-chart" style="height:350px;"></div>
+          </div>
+        </div>
+      </div>    </section>
+
+    <!-- ==================== Tab 4: 蒙特卡洛 ==================== -->
+    <section id="tab-montecarlo" class="tab-panel" role="tabpanel">
+      <h2>蒙特卡洛</h2>
+
+      <div class="form-grid">
+        <label>
+          技能系数 (eff_value)
+          <input type="number" id="mc-eff-value" value="300" min="0" step="0.01">
+        </label>
+        <label>
+          ATK
+          <input type="number" id="mc-atk" value="1500" min="0" step="1">
+        </label>
+        <label>
+          暴击率 (%)
+          <input type="number" id="mc-crit-rate" value="3" min="0" max="100" step="0.1">
+        </label>
+        <label>
+          暴伤倍率 (%)
+          <input type="number" id="mc-crit-dmg" value="125" min="100" max="999" step="0.1">
+        </label>
+        <label>
+          属性颜色加成 (%)
+          <input type="number" id="mc-element-bonus" value="0" min="0" max="999" step="0.1">
+        </label>
+        <label>
+          追加攻击加成 (%)
+          <input type="number" id="mc-extra-atk-bonus" value="0" min="0" max="999" step="0.1">
+        </label>
+        <label>
+          伤害类型
+          <select id="mc-dmg-type">
+            <option value="normal">普通伤害</option>
+            <option value="penetrate">贯穿伤害</option>
+            <option value="fixed">固定伤害</option>
+            <option value="defense_mixed">基于防御(混合)</option>
+            <option value="defense_80">基于80%防御</option>
+            <option value="defense_100">基于100%防御</option>
+          </select>
+        </label>
+        <label>
+          模拟次数
+          <select id="mc-sim-count">
+            <option value="1000">1,000</option>
+            <option value="10000" selected>10,000</option>
+            <option value="100000">100,000</option>
+            <option value="1000000">1,000,000</option>
+          </select>
+        </label>
+        <label>
+          随机种子 (可选)
+          <input type="number" id="mc-seed" placeholder="留空则随机" step="1">
+        </label>
+      </div>
+
+      <button class="btn-primary" id="btn-mc-start">开始模拟</button>
+
+      <div id="monte-carlo-stats"></div>
+      <div id="monte-carlo-chart" style="height: 400px;"></div>
+    </section>
+
+  </main>
+
+  <!-- ==================== 结果面板 (共享) ==================== -->
+  <aside id="result-panel">
+    <h2>计算结果</h2>
+    <div class="result-values">
+      <div class="result-item">
+        <span class="result-label">非暴击伤害</span>
+        <span class="result-num" id="result-normal">—</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">暴击伤害</span>
+        <span class="result-num" id="result-crit">—</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">期望伤害</span>
+        <span class="result-num" id="result-expected">—</span>
+      </div>
+    </div>
+
+    <!-- 计算过程 -->
+    <details class="section-block" id="calc-steps">
+      <summary>计算过程</summary>
+      <div class="calc-steps-content">
+        <p class="placeholder-text">点击"计算伤害"后此处显示详细步骤</p>
+      </div>
+    </details>
+
+    <!-- 配置对比 -->
+    <div class="config-compare">
+      <h3>配置对比</h3>
+      <div class="compare-toolbar">
+        <button class="btn-secondary" id="btn-save-config-a">保存为 A</button>
+        <button class="btn-secondary" id="btn-save-config-b">保存为 B</button>
+        <button class="btn-secondary" id="btn-load-config-a">加载 A</button>
+        <button class="btn-secondary" id="btn-load-config-b">加载 B</button>
+      </div>
+      <div class="compare-panels">
+        <div class="compare-slot" id="compare-a">
+          <h4>配置 A</h4>
+          <div class="compare-content">未保存</div>
+        </div>
+        <div class="compare-slot" id="compare-b">
+          <h4>配置 B</h4>
+          <div class="compare-content">未保存</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <footer class="app-footer">
+    <p>卡厄思梦境伤害计算器 — 数据来源: NGA 玩家社区代码分析</p>
+  </footer>
+
+  <!-- ES Module 入口 -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

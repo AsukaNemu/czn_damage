@@ -1,0 +1,13 @@
+{
+  "dmg_revise_rate": 0.36,
+  "shield_revise_rate": 0.3,
+  "dmg_decrease_rate_0_value": -160,
+  "dmg_decrease_rate_curv_value": 300,
+  "rage_base": 1.1,
+  "rage_scale": 1.25,
+  "battle_rage_turn": 5,
+  "elite_rage_turn": 7,
+  "boss_rage_turn": 10,
+  "shield_cal_rate_for_base_def": 1.0,
+  "shield_cal_rate_for_add_def": 0.5
+}

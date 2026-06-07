@@ -1,0 +1,460 @@
+/* ===== 卡厄思梦境 伤害计算器 ===== */
+
+/* Reset & Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #e0e0e0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(240, 165, 0, 0.2);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  color: #f0a500;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+/* Tabs */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  background: #1e2a3a;
+  border: 1px solid #2a3a4a;
+  padding: 10px 20px;
+  color: #aaa;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  background: #2a3a5a;
+  color: #fff;
+}
+
+.tab-btn.active {
+  background: #f0a500;
+  color: #1a1a2e;
+  font-weight: bold;
+  border-color: #f0a500;
+}
+
+/* Tab Panels */
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+/* Cards */
+.card {
+  background: rgba(30, 42, 58, 0.8);
+  border: 1px solid rgba(240, 165, 0, 0.15);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 0 15px rgba(240, 165, 0, 0.05);
+}
+
+.card h3 {
+  color: #f0a500;
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  color: #aaa;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.form-group input[type="number"] {
+  width: 100%;
+  background: rgba(15, 20, 30, 0.8);
+  border: 1px solid #2a3a4a;
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+}
+
+.form-group input[type="number"]:focus {
+  border-color: #f0a500;
+  outline: none;
+  box-shadow: 0 0 5px rgba(240, 165, 0, 0.3);
+}
+
+.form-group select {
+  width: 100%;
+  background: rgba(15, 20, 30, 0.8);
+  border: 1px solid #2a3a4a;
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  appearance: auto;
+}
+
+.form-group select:focus {
+  border-color: #f0a500;
+  outline: none;
+  box-shadow: 0 0 5px rgba(240, 165, 0, 0.3);
+}
+
+.form-group textarea {
+  width: 100%;
+  background: rgba(15, 20, 30, 0.8);
+  border: 1px solid #2a3a4a;
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  min-height: 80px;
+  font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+  resize: vertical;
+}
+
+.form-group textarea:focus {
+  border-color: #f0a500;
+  outline: none;
+  box-shadow: 0 0 5px rgba(240, 165, 0, 0.3);
+}
+
+/* Buttons */
+.btn-calc {
+  background: #f0a500;
+  color: #1a1a2e;
+  padding: 12px 32px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-calc:hover {
+  background: #ffb830;
+  box-shadow: 0 0 15px rgba(240, 165, 0, 0.4);
+}
+
+.btn-calc:active {
+  background: #d99200;
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background: #2a3a4a;
+  color: #e0e0e0;
+  border: 1px solid #3a4a5a;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #3a4a5a;
+  border-color: #4a5a6a;
+}
+
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+/* Collapsible Sections */
+details {
+  margin-bottom: 12px;
+}
+
+details summary {
+  cursor: pointer;
+  color: #f0a500;
+  font-weight: bold;
+  padding: 8px 0;
+  user-select: none;
+}
+
+details summary:hover {
+  color: #ffb830;
+}
+
+details[open] summary {
+  margin-bottom: 12px;
+}
+
+/* Result Panel */
+.result-panel {
+  background: rgba(240, 165, 0, 0.05);
+  border: 1px solid rgba(240, 165, 0, 0.2);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.result-row:last-child {
+  border-bottom: none;
+}
+
+.result-label {
+  color: #aaa;
+}
+
+.result-value {
+  color: #f0a500;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.result-value.crit {
+  color: #ff6b6b;
+}
+
+/* Calculation Steps */
+.calc-steps {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  padding: 12px;
+  font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+  font-size: 0.85rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.step-item {
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.step-item:last-child {
+  border-bottom: none;
+}
+
+.step-num {
+  color: #f0a500;
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+/* Chart Container */
+.chart-container {
+  background: rgba(15, 20, 30, 0.6);
+  border-radius: 8px;
+  padding: 10px;
+  min-height: 400px;
+}
+
+/* Monte Carlo Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  color: #f0a500;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.stat-label {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+/* Compare Panel */
+.compare-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.compare-slot {
+  background: rgba(30, 42, 58, 0.8);
+  border: 1px solid rgba(240, 165, 0, 0.15);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 0 15px rgba(240, 165, 0, 0.05);
+}
+
+/* Toggle Switch */
+.toggle-group {
+  display: inline-flex;
+  gap: 4px;
+  background: #1e2a3a;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.toggle-btn {
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: #aaa;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+  color: #e0e0e0;
+}
+
+.toggle-btn.active {
+  background: #f0a500;
+  color: #1a1a2e;
+  font-weight: bold;
+}
+
+/* Progress Bar */
+.progress-bar {
+  height: 4px;
+  background: #1e2a3a;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #f0a500;
+  transition: width 0.3s ease;
+}
+
+/* Scrollbar Styling (WebKit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(240, 165, 0, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(240, 165, 0, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  body {
+    padding: 12px;
+  }
+
+  .header h1 {
+    font-size: 1.2rem;
+  }
+
+  .tab-bar {
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+
+  .form-grid,
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-container {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .btn-calc {
+    width: 100%;
+    padding: 12px 20px;
+  }
+}
+
+/* ─── 子标签页 ────────────────────────────────────────────────────────────── */
+.sub-tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 6px;
+  padding: 3px;
+}
+.sub-tab-btn {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.sub-tab-btn:hover { color: #ccc; background: rgba(255,255,255,0.05); }
+.sub-tab-btn.active { background: #f0a500; color: #1a1a2e; font-weight: bold; }
+.sub-panel { display: none; }
+.sub-panel.active { display: block; }
+
+/* ─── 提示文本 ────────────────────────────────────────────────────────────── */
+.hint-text { color: #888; font-size: 0.85rem; margin-bottom: 12px; }

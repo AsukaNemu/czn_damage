@@ -149,8 +149,16 @@ open http://localhost:8080
 
 ```javascript
 DamageEngine.runTests()
-// 输出: "✓ 12/12 tests passed"
+// 返回 { passed: 13, total: 13, failures: [] }
 ```
+
+也可以使用 Node.js 22 在命令行运行现有引擎断言（CI 使用相同入口；浏览器运行仍无需 Node.js）：
+
+```bash
+node --experimental-default-type=module test/run-tests.mjs
+```
+
+任一断言失败会以非零状态退出。这些断言校验仓库中记录的公式，不代表已核对当前游戏赛季数据。
 
 ## 项目结构
 

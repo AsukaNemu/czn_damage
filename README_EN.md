@@ -96,8 +96,16 @@ Open browser console (F12), run:
 
 ```javascript
 DamageEngine.runTests()
-// Output: "✓ 12/12 tests passed"
+// Returns { passed: 13, total: 13, failures: [] }
 ```
+
+Run the same existing engine assertions from the command line with Node.js 22 (used by CI; Node.js is optional for browser use):
+
+```bash
+node --experimental-default-type=module test/run-tests.mjs
+```
+
+Any failed assertion exits with a nonzero status. These assertions check the formulas recorded in this repository, not the current game's seasonal data.
 
 ## Damage Formula
 

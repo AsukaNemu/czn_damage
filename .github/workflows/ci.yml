@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          for file in js/*.js test/*.mjs; do
+            node --experimental-default-type=module --check "$file"
+          done
+      - name: Run existing damage engine assertions
+        run: node --experimental-default-type=module test/run-tests.mjs
